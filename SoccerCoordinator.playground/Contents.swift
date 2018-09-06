@@ -20,3 +20,50 @@ let players = [
     ["name": "Herschel Krustofski", "height": 45, "experience": true,   "guardians": "Hyman and Rachel Krustofski"]
 ]
 
+// Initialize teams
+let numTeams = 3
+var teamSharks: [[String: Any]] = []
+var teamDragons: [[String: Any]] = []
+var teamRaptors: [[String: Any]] = []
+
+// Divide players into experienced and inexperienced players
+var experiencedPlayers: [[String: Any]] = []
+var inexperiencedPlayers: [[String: Any]] = []
+
+for p in players {
+    let experience = p["experience"] as! Bool
+    if experience {
+        experiencedPlayers.append(p)
+    } else {
+        inexperiencedPlayers.append(p)
+    }
+}
+
+/**
+ Add players evenly to the available teams.
+
+ Uses a round-robin way to add the players.
+
+ - parameter playersArray: The players to add to the teams.
+*/
+func addPlayersToTeams(_ playersArray: [[String: Any]]) {
+    var teamIndex = 0
+    for p in playersArray {
+        switch teamIndex {
+        case 0: teamSharks.append(p)
+        case 1: teamDragons.append(p)
+        case 2: teamRaptors.append(p)
+        default: print("Error: teamIndex should be 0...2.")
+        }
+        teamIndex += 1
+        teamIndex %= numTeams
+    }
+}
+
+// Add the players to the teams
+addPlayersToTeams(experiencedPlayers)
+addPlayersToTeams(inexperiencedPlayers)
+
+teamSharks
+teamDragons
+teamRaptors
