@@ -1,3 +1,4 @@
+// Part 1
 // Define players (from SoccerPlayerInfo.xlsl)
 let players = [
     ["name": "Joe Smith",           "height": 42, "experience": true,   "guardians": "Jim and Jan Smith"],
@@ -20,6 +21,7 @@ let players = [
     ["name": "Herschel Krustofski", "height": 45, "experience": true,   "guardians": "Hyman and Rachel Krustofski"]
 ]
 
+// Part 2
 // Initialize teams
 let numTeams = 3
 var teamSharks: [[String: Any]] = []
@@ -67,3 +69,6 @@ addPlayersToTeams(inexperiencedPlayers)
 teamSharks
 teamDragons
 teamRaptors
+
+// Part 3:
+// Assemble letters
