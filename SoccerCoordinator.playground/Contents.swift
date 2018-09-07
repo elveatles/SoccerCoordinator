@@ -122,9 +122,6 @@ addPlayers(inexperiencedPlayers)
 teamSharks["players"] = teams[teamSharksIndex]["players"]
 teamDragons["players"] = teams[teamDragonsIndex]["players"]
 teamRaptors["players"] = teams[teamRaptorsIndex]["players"]
-print((teamSharks["players"] as! [[String: Any]]).count)
-print((teamDragons["players"] as! [[String: Any]]).count)
-print((teamRaptors["players"] as! [[String: Any]]).count)
 
 // Extra Credit
 /**
