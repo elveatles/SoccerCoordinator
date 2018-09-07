@@ -23,15 +23,17 @@ let players = [
 
 // Part 2
 // Initialize teams
-let numTeams = 3
-var teamSharks: [[String: Any]] = []
-var teamDragons: [[String: Any]] = []
-var teamRaptors: [[String: Any]] = []
+var teamSharks: [String: Any] = ["name": "Sharks",      "practiceTime": "March 17, 1pm", "players": []]
+var teamDragons: [String: Any] = ["name": "Dragons",    "practiceTime": "March 17, 3pm", "players": []]
+var teamRaptors: [String: Any] = ["name": "Raptors",    "practiceTime": "March 18, 1pm", "players": []]
+let teamSharksIndex = 0
+let teamDragonsIndex = 1
+let teamRaptorsIndex = 2
+var teams = [teamSharks, teamDragons, teamRaptors]
 
 // Divide players into experienced and inexperienced players
 var experiencedPlayers: [[String: Any]] = []
 var inexperiencedPlayers: [[String: Any]] = []
-
 for p in players {
     let experience = p["experience"] as! Bool
     if experience {
@@ -42,33 +44,54 @@ for p in players {
 }
 
 /**
- Add players evenly to the available teams.
+ Used in addPlayers to get the index of the team to start adding to.
 
- Uses a round-robin way to add the players.
-
- - parameter playersArray: The players to add to the teams.
+ This is for the case where the number of players doesn't perfectly divide into the number of teams.
+ For example teamSharks.count == 3, teamDragons.count == 3, teamRaptors.count == 2.
+ The index returned would be 2 because we should start adding players for teamRaptors instead of starting at index 0 again (teamSharks).
 */
-func addPlayersToTeams(_ playersArray: [[String: Any]]) {
-    var teamIndex = 0
-    for p in playersArray {
-        switch teamIndex {
-        case 0: teamSharks.append(p)
-        case 1: teamDragons.append(p)
-        case 2: teamRaptors.append(p)
-        default: print("Error: teamIndex should be 0...2.")
+func getStartTeamIndex() -> Int {
+    var lastCount = 0
+    for i in 0..<teams.count {
+        let team = teams[i]
+        if team.count < lastCount {
+            return i
         }
-        teamIndex += 1
-        teamIndex %= numTeams
+        lastCount = i
+    }
+    return 0
+}
+
+/**
+ Add players to teams.
+
+ Uses a round-robin way to add them so they are distributed evenly.
+
+ - parameter playerArray: The players to add to teams.
+*/
+func addPlayers(_ playerArray: [[String: Any]]) {
+    var index = getStartTeamIndex()
+    for p in playerArray {
+        var team = teams[index]
+        var players = team["players"] as! [[String: Any]]
+        players.append(p)
+        // Because collections are copied when they are assigned, the modified copy has to be assigned back to the original variables
+        team["players"] = players
+        teams[index] = team
+
+        // Increment index and go back to 0 if the index reached teams.count so that the index does not go out of bounds
+        index += 1
+        index %= teams.count
     }
 }
 
-// Add the players to the teams
-addPlayersToTeams(experiencedPlayers)
-addPlayersToTeams(inexperiencedPlayers)
-
-teamSharks
-teamDragons
-teamRaptors
+// Add players
+addPlayers(experiencedPlayers)
+addPlayers(inexperiencedPlayers)
+// Assign teams players back to original variables since the change happened on the copy
+teamSharks["players"] = teams[teamSharksIndex]["players"]
+teamDragons["players"] = teams[teamDragonsIndex]["players"]
+teamRaptors["players"] = teams[teamRaptorsIndex]["players"]
 
 // Part 3:
 // Assemble letters
