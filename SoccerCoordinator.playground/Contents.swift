@@ -95,3 +95,33 @@ teamRaptors["players"] = teams[teamRaptorsIndex]["players"]
 
 // Part 3:
 // Assemble letters
+var letters: [String] = []
+
+/**
+ Create letters for a team.
+
+ - Parameter team: The team to create letters for.
+ - Returns: The letters for the team.
+*/
+func createLetters(for team: [String: Any]) -> [String] {
+    let teamName = team["name"] as! String
+    let practiceTime = team["practiceTime"] as! String
+    var teamLetters: [String] = []
+    for player in team["players"] as! [[String: Any]] {
+        let guardians = player["guardians"]!
+        let playerName = player["name"]!
+        let letter = "Dear \(guardians), \(playerName) will be in the \(teamName) team. We will meet for practice on \(practiceTime)."
+        teamLetters.append(letter)
+    }
+    return teamLetters
+}
+
+// Create letters for all the teams
+for team in teams {
+    letters += createLetters(for: team)
+}
+
+// Print all the letters
+for letter in letters {
+    print(letter)
+}
