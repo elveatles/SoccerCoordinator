@@ -23,13 +23,10 @@ let players = [
 
 // Part 2
 // Initialize teams
-var teamSharks: [String: Any] =     ["name": "Sharks",  "practiceTime": "March 17, 1pm", "players": []]
-var teamDragons: [String: Any] =    ["name": "Dragons", "practiceTime": "March 17, 3pm", "players": []]
-var teamRaptors: [String: Any] =    ["name": "Raptors", "practiceTime": "March 18, 1pm", "players": []]
-let teamSharksIndex = 0
-let teamDragonsIndex = 1
-let teamRaptorsIndex = 2
-var teams = [teamSharks, teamDragons, teamRaptors]
+var teamSharks: [[String: Any]] = []
+var teamDragons: [[String: Any]] = []
+var teamRaptors: [[String: Any]] = []
+let numberOfTeams = 3
 
 // Divide players into experienced and inexperienced players
 var experiencedPlayers: [[String: Any]] = []
@@ -43,85 +40,50 @@ for p in players {
     }
 }
 
-/**
- Used in addPlayers to get the index of the team to start adding to.
- This is for the case where the number of players doesn't perfectly divide into the number of teams.
- For example teamSharks.count == 3, teamDragons.count == 3, teamRaptors.count == 2.
- The index returned would be 2 because we should start adding players for teamRaptors instead of starting at index 0 again (teamSharks).
- Another example: teamSharks.count == 2, teamDragons.count == 2, teamRaptors.count == 3.
- The index returned would be 4 (gets mapped to 2) for teamDragons going in the reverse direction.
+// Sort experience players in ascending order.
+experiencedPlayers.sort { (a, b) -> Bool in
+    let aHeight = a["height"] as! Double
+    let bHeight = b["height"] as! Double
+    return aHeight < bHeight
+}
 
- - Returns: The index to start with.
- */
-func getStartTeamIndex() -> Int {
-    for i in 1..<teams.count {
-        let team = teams[i]
-        let teamPlayers = team["players"] as! [[String: Any]]
-        let prevTeam = teams[i - 1]
-        let prevTeamPlayers = prevTeam["players"] as! [[String: Any]]
-        if teamPlayers.count < prevTeamPlayers.count {
-            // Index is going forwards
-            return i
-        } else if teamPlayers.count > prevTeamPlayers.count {
-            // Index is going backwards
-            return i - 1 + teams.count
-        }
-    }
-    return 0
+// Sort inexperienced players in decending order.
+// This bring each team's average height closer to each other as apposed to ascending order for both.
+inexperiencedPlayers.sort { (a, b) -> Bool in
+    let aHeight = a["height"] as! Double
+    let bHeight = b["height"] as! Double
+    return aHeight > bHeight
 }
 
 /**
- Add players to teams.
+ Add players to each team in a round-robin way.
 
- Sorts the player array by height and adds the players like
-
- 0, 1, 2, 2, 1, 0, 0, 1, 2, 2, 1, 0, etc.
-
- This is to evenly distribute by height.
-
- - parameter playerArray: The players to add to teams.
+ - Parameter playersToAdd: The players to add to the teams.
 */
-func addPlayers(_ playerArray: [[String: Any]]) {
-    // Extra Credit:
-    // Sort the player array by height
-    var sortedPlayerArray = playerArray
-    sortedPlayerArray.sort { (a, b) -> Bool in
-        let aHeight = a["height"] as! Double
-        let bHeight = b["height"] as! Double
-        return aHeight < bHeight
-    }
-
-    var expandedIndex = getStartTeamIndex()
-    var index = expandedIndex
-    // Loop through the players and add them to the teams.
-    for p in sortedPlayerArray {
-        // This makes the index go forward and backward
-        if expandedIndex >= teams.count {
-            index = teams.count * 2 - expandedIndex - 1
-        } else {
-            index = expandedIndex
+func addPlayers(_ playersToAdd: [[String: Any]]) {
+    var i = 0
+    for player in playersToAdd {
+        switch i {
+        case 0: teamSharks.append(player)
+        case 1: teamDragons.append(player)
+        case 2: teamRaptors.append(player)
+        default: print("Error: i should be 0...2. i: \(i)")
         }
-        var team = teams[index]
-        var players = team["players"] as! [[String: Any]]
-        players.append(p)
-        // Because collections are copied when they are assigned, the modified copy has to be assigned back to the original variables
-        team["players"] = players
-        teams[index] = team
 
-        // expandedIndex is double the team size so the index can go forward and backward.
-        // Use %= to set expandedIndex back to 0 when it gets to double the team size.
-        expandedIndex += 1
-        expandedIndex %= teams.count * 2
+        i += 1
+        // Go back to 0 if index reaches teams.count
+        i %= numberOfTeams
     }
 }
 
-// Add players
+// Add experienced and inexperienced players
 addPlayers(experiencedPlayers)
 addPlayers(inexperiencedPlayers)
-// Assign teams players back to original variables since the change happened on the copy
-teamSharks["players"] = teams[teamSharksIndex]["players"]
-teamDragons["players"] = teams[teamDragonsIndex]["players"]
-teamRaptors["players"] = teams[teamRaptorsIndex]["players"]
+
+// Show the team players
+teamSharks
+teamDragons
+teamRaptors
 
 // Extra Credit
 /**
@@ -130,14 +92,13 @@ teamRaptors["players"] = teams[teamRaptorsIndex]["players"]
  - Parameter team: The team to get the average height for.
  - Returns: The average height.
 */
-func getAverageHeight(for team: [String: Any]) -> Double {
+func getAverageHeight(for team: [[String: Any]]) -> Double {
     var result = 0.0
-    let teamPlayers = team["players"] as! [[String: Any]]
-    for player in teamPlayers {
+    for player in team {
         let height = player["height"] as! Double
         result += height
     }
-    result /= Double(teamPlayers.count)
+    result /= Double(team.count)
     return result
 }
 
@@ -159,11 +120,9 @@ var letters: [String] = []
  - Parameter team: The team to create letters for.
  - Returns: The letters for the team.
 */
-func createLetters(for team: [String: Any]) -> [String] {
-    let teamName = team["name"] as! String
-    let practiceTime = team["practiceTime"] as! String
+func createLetters(for team: [[String: Any]], teamName: String, practiceTime: String) -> [String] {
     var teamLetters: [String] = []
-    for player in team["players"] as! [[String: Any]] {
+    for player in team {
         let guardians = player["guardians"]!
         let playerName = player["name"]!
         let letter = "Dear \(guardians), \(playerName) will be on the \(teamName) team. We will meet for practice on \(practiceTime)."
@@ -173,9 +132,9 @@ func createLetters(for team: [String: Any]) -> [String] {
 }
 
 // Create letters for all the teams
-for team in teams {
-    letters += createLetters(for: team)
-}
+letters += createLetters(for: teamSharks, teamName: "Sharks", practiceTime: "March 17, 3pm")
+letters += createLetters(for: teamDragons, teamName: "Dragons", practiceTime: "March 17, 1pm")
+letters += createLetters(for: teamRaptors, teamName: "Raptors", practiceTime: "March 18, 1pm")
 
 // Print all the letters
 for letter in letters {
